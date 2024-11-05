@@ -1,19 +1,32 @@
 name: Deploy to GitHub Pages
- 
+
 on:
   push:
     branches:
       - main  # or master if that is your default branch
- 
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
- 
+
+      - name: Determine publish directory
+        id: determine-dir
+        run: |
+          if [ -f "Q1/index.html" ]; then
+            echo "publish_dir=q1" >> $GITHUB_ENV
+          elif [ -f "Q2/index.html" ]; then
+            echo "publish_dir=q2" >> $GITHUB_ENV
+          else
+            echo "No HTML file found in Q1 or Q2."
+            exit 1
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # Adjust to the root folder of your project if necessary
+          publish_dir: ${{ env.publish_dir }}
+
